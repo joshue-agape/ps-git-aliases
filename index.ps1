@@ -494,3 +494,135 @@ function gMerge {
         Write-Host "❌ Merge failed: $branch_name"
     }
 }
+
+
+# Description
+# This function manages Git remotes.
+# It can list existing remotes or add a new remote repository.
+
+# Usage
+# gRemote                → List all remotes
+# gRemote <name> <url>  → Add a new remote (default: origin)
+function gRemote {
+    param(
+        [string]$remote_name = "origin",
+        [string]$url
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    try {
+        if (-not $url) {
+            git remote -v
+        }
+        else {
+            git remote add $remote_name $url
+            Write-Host "✅ Remote added: $remote_name -> $url"
+        }
+    }
+    catch {
+        Write-Host "❌ Failed to manage remote: $remote_name"
+    }
+}
+
+
+# Description
+# This function pushes commits to a remote repository.
+
+# Usage
+# gPush                      → Push current branch to origin
+# gPush <remote> <branch>   → Push specific branch
+function gPush {
+    param(
+        [string]$remote_name = "origin",
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        if (-not $branch_name) {
+            $branch_name = git branch --show-current
+
+            if (-not $branch_name) {
+                Write-Host "❌ Unable to detect current branch"
+                return
+            }
+        }
+
+        git push $remote_name $branch_name
+        Write-Host "✅ Pushed: $remote_name/$branch_name"
+    }
+    catch {
+        Write-Host "❌ Failed to push: $remote_name/$branch_name"
+    }
+}
+
+
+# Description
+# This function pulls changes from a remote repository.
+
+# Usage
+# gPull                      → Pull current branch from origin
+# gPull <remote> <branch>   → Pull specific branch
+function gPull {
+    param(
+        [string]$remote_name = "origin",
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        if (-not $branch_name) {
+            $branch_name = git branch --show-current
+
+            if (-not $branch_name) {
+                Write-Host "❌ Unable to detect current branch"
+                return
+            }
+        }
+
+        git pull $remote_name $branch_name
+        Write-Host "✅ Pulled: $remote_name/$branch_name"
+    }
+    catch {
+        Write-Host "❌ Failed to pull: $remote_name/$branch_name"
+    }
+}
+
+
+# Description
+# This function fetches updates from a remote repository without merging.
+
+# Usage
+# gFetch           → Fetch from origin
+# gFetch <remote>  → Fetch from specific remote
+function gFetch {
+    param(
+        [string]$remote_name = "origin"
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        git fetch $remote_name
+        Write-Host "✅ Fetched from: $remote_name"
+    }
+    catch {
+        Write-Host "❌ Failed to fetch from: $remote_name"
+    }
+}
+
