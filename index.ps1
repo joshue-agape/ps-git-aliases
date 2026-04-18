@@ -302,3 +302,98 @@ function gMove {
     }
 }
 
+
+# Description
+# This function creates Git commits with different options:
+# - Normal commit
+# - Commit with all tracked changes (-a)
+# - Amend last commit (--amend)
+
+# Usage
+# gCommit <message>           → Normal commit
+# gCommit -a <message>        → Commit all tracked changes
+# gCommit --amend <message>   → Amend last commit
+function gCommit {
+    param(
+        [ValidateSet("-a","-u","--amend")]
+        [string]$type,
+
+        [Parameter(Mandatory=$true, Position=0)]
+        [string]$message
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    if (-not $message) {
+        Write-Host "Usage: gCommit [-a|-u|--amend] <message>"
+        return
+    }
+
+    try {
+        switch ($type) {
+            "-a"      { git commit -a -m "$message" }
+            "-u"      { git commit --amend -m "$message" }
+            "--amend" { git commit --amend -m "$message" }
+            default   { git commit -m "$message" }
+        }
+
+        Write-Host "✅ Commit created: $message"
+    }
+    catch {
+        Write-Host "❌ Failed to create commit"
+    }
+}
+
+
+# Description
+# This function manages Git branches:
+# - Create a branch
+# - Delete a branch (-d or -D)
+# - List all branches if no argument is provided
+
+# Usage
+# gBranch              → List branches
+# gBranch <name>       → Create branch
+# gBranch -d <name>    → Delete branch (safe)
+# gBranch -D <name>    → Force delete branch
+function gBranch {
+    param(
+        [ValidateSet("-d","-D")]
+        [string]$type,
+
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    try {
+        if (-not $branch_name) {
+            git branch
+            return
+        }
+
+        switch ($type) {
+            "-d" {
+                git branch -d $branch_name
+                Write-Host "✅ Branch deleted: $branch_name"
+            }
+            "-D" {
+                git branch -D $branch_name
+                Write-Host "✅ Branch force deleted: $branch_name"
+            }
+            default {
+                git branch $branch_name
+                Write-Host "✅ Branch created: $branch_name"
+            }
+        }
+    }
+    catch {
+        Write-Host "❌ Error with branch: $branch_name"
+    }
+}
