@@ -397,3 +397,100 @@ function gBranch {
         Write-Host "❌ Error with branch: $branch_name"
     }
 }
+
+
+# Description
+# This function checks out a Git branch.
+# It can also create and switch to a new branch if -b is used.
+
+# Usage
+# gCheck <branch>        → Switch to existing branch
+# gCheck -b <branch>     → Create and switch to new branch
+function gCheck {
+    param(
+        [switch]$b,
+        [Parameter(Mandatory=$true)]
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        if ($b) {
+            git checkout -b $branch_name
+            Write-Host "✅ Branch created and switched: $branch_name"
+        }
+        else {
+            git checkout $branch_name
+            Write-Host "✅ Switched to branch: $branch_name"
+        }
+    }
+    catch {
+        Write-Host "❌ Failed to checkout branch: $branch_name"
+    }
+}
+
+
+# Description
+# This function switches between Git branches using 'git switch'.
+
+# Usage
+# gSwitch <branch> → Switch to a branch
+function gSwitch {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    if (-not $branch_name) {
+        Write-Host "Usage: gSwitch <branch_name>"
+        return
+    }
+
+    try {
+        git switch $branch_name
+        Write-Host "✅ Switched to branch: $branch_name"
+    }
+    catch {
+        Write-Host "❌ Failed to switch to branch: $branch_name"
+    }
+}
+
+
+# Description
+# This function merges a Git branch into the current branch.
+
+# Usage
+# gMerge <branch> → Merge specified branch into current branch
+function gMerge {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    if (-not $branch_name) {
+        Write-Host "Usage: gMerge <branch_name>"
+        return
+    }
+
+    try {
+        git merge $branch_name
+        Write-Host "✅ Merge completed: $branch_name"
+    }
+    catch {
+        Write-Host "❌ Merge failed: $branch_name"
+    }
+}
