@@ -197,3 +197,49 @@ function gClone {
     }
 }
 
+
+# Description
+# This function displays the current Git repository status.
+
+# Usage
+# gStatus → Show Git status
+function gStatus {
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    try {
+        git status
+    }
+    catch {
+        Write-Host "❌ Failed to execute git status"
+    }
+}
+
+
+# Description
+# This function stages files in the Git repository.
+# If no file is specified, it stages all changes.
+
+# Usage
+# gAdd        → Stage all files
+# gAdd file   → Stage a specific file
+function gAdd {
+    param([string]$file)
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    $target = if ($file) { $file } else { "." }
+
+    try {
+        git add $target
+        Write-Host "✅ Successfully added: $target"
+    }
+    catch {
+        Write-Host "❌ Failed to add files: $target"
+    }
+}
