@@ -1,10 +1,10 @@
 # 🚀 Git Command Aliases – Documentation  
 
-![GitHub repo size](https://img.shields.io/github/repo-size/joshue-agape/git-commandes)
-![GitHub stars](https://img.shields.io/github/stars/joshue-agape/git-commandes?style=social)
-![GitHub forks](https://img.shields.io/github/forks/joshue-agape/git-commandes?style=social)
-![GitHub issues](https://img.shields.io/github/issues/joshue-agape/git-commandes)
-![License](https://img.shields.io/github/license/joshue-agape/git-commandes)
+![GitHub repo size](https://img.shields.io/github/repo-size/joshue-agape/ps-git-aliases)
+![GitHub stars](https://img.shields.io/github/stars/joshue-agape/ps-git-aliases?style=social)
+![GitHub forks](https://img.shields.io/github/forks/joshue-agape/ps-git-aliases?style=social)
+![GitHub issues](https://img.shields.io/github/issues/joshue-agape/ps-git-aliases)
+![License](https://img.shields.io/github/license/joshue-agape/ps-git-aliases)
 ![PowerShell](https://img.shields.io/badge/PowerShell-Ready-blue?logo=powershell)
 
 Welcome to this documentation for setting up Git command aliases using PowerShell to boost your command-line productivity.  
@@ -13,7 +13,7 @@ Welcome to this documentation for setting up Git command aliases using PowerShel
 
 Before using the aliases, you need to configure your PowerShell profile.  
 
-- Check if the profile exists:
+### Check if the profile exists  
 
 ```bash
 Test-Path $PROFILE
@@ -22,20 +22,21 @@ Test-Path $PROFILE
 True → the profile already exists  
 False → proceed to the next step  
 
-- Create the profile
+### Create the profile
 
 ```bash
 New-Item -Path $PROFILE -ItemType File -Force
 ```
 
-- Open and edit the profile
-Using Notepad:  
+### Open and edit the profile  
+
+- Using Notepad:  
 
 ```bash
 New-Item -Path $PROFILE -ItemType File -Force
 ```
 
-Or using VS Code:  
+- Or using VS Code:  
 
 ```bash
 code $PROFILE
@@ -43,39 +44,41 @@ code $PROFILE
 
 ## 📦 Install Git Aliases  
 
-- Clone the repository:
+### Clone the repository  
 
 ```bash
-git clone https://github.com/joshue-agape/... git-commandes
+git clone https://github.com/joshue-agape/ps-git-aliases.git git-commandes
 ```
 
-- Copy alias files to config directory:
+### Copy alias files to config directory  
 
 ```bash
-cp git-commandes "$HOME\.config\alias\git-commandes\"
+cp git-commandes "$HOME\.config\alias\"
 ```
 
 💡 Make sure the directory exists, otherwise create it:
 
 ```bash
-mkdir -p "$HOME\.config\alias\git-commandes"
+mkdir -p "$HOME\.config\alias\"
 ```
 
-- Import aliases into PowerShell:
+### Import aliases into PowerShell  
+
 Add the following line to your PowerShell profile  
 
 ```bash
 . "$HOME\.config\alias\git-commandes\index.ps1"
 ```
 
-- Apply changes:
+### Apply changes  
+
 Reload your profile  
 
 ```bash
 . $PROFILE
 ```
 
-✅ Result  
+### ✅ Result  
 
 Your Git aliases are now active 🎉  
 You can start using them directly in your terminal to speed up your workflow.  
