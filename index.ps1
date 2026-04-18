@@ -843,3 +843,144 @@ function gStash {
         Write-Host "❌ Stash operation failed: $type"
     }
 }
+
+
+# Description
+# This function manages Git tags (list, create, annotate, delete, show).
+
+# Usage
+# gTag list                          → List all tags
+# gTag create <tag>                 → Create a lightweight tag
+# gTag annotate <tag> <message>     → Create an annotated tag
+# gTag delete <tag>                 → Delete a tag
+# gTag show <tag>                   → Show tag details
+function gTag {
+    param(
+        [ValidateSet("list","create","annotate","delete","show")]
+        [string]$type,
+
+        [string]$name,
+        [string]$message
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        switch ($type) {
+
+            "list" {
+                git tag
+            }
+
+            "create" {
+                if (-not $name) {
+                    Write-Host "Usage: gTag create <tag_name>"
+                    return
+                }
+                git tag $name
+                Write-Host "✅ Tag created: $name"
+            }
+
+            "annotate" {
+                if (-not $name -or -not $message) {
+                    Write-Host "Usage: gTag annotate <tag_name> <message>"
+                    return
+                }
+                git tag -a $name -m $message
+                Write-Host "✅ Annotated tag created: $name"
+            }
+
+            "delete" {
+                if (-not $name) {
+                    Write-Host "Usage: gTag delete <tag_name>"
+                    return
+                }
+                git tag -d $name
+                Write-Host "✅ Tag deleted: $name"
+            }
+
+            "show" {
+                if (-not $name) {
+                    Write-Host "Usage: gTag show <tag_name>"
+                    return
+                }
+                git show $name
+            }
+
+            default {
+                git tag
+            }
+        }
+    }
+    catch {
+        Write-Host "❌ Tag operation failed: $type"
+    }
+}
+
+
+# Description
+# This function pushes Git tags to a remote repository.
+
+# Usage
+# gPushTag              → Push all tags
+# gPushTag <tag>        → Push specific tag
+function gPushTag {
+    param(
+        [string]$remote_name = "origin",
+        [string]$tag_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        if (-not $tag_name) {
+            git push $remote_name --tags
+            Write-Host "✅ All tags pushed to $remote_name"
+        }
+        else {
+            git push $remote_name $tag_name
+            Write-Host "✅ Tag pushed: $tag_name → $remote_name"
+        }
+    }
+    catch {
+        Write-Host "❌ Failed to push tag"
+    }
+}
+
+
+# Description
+# This function applies a specific commit using cherry-pick.
+
+# Usage
+# gCherryPick <commit>
+
+function gCherryPick {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$commit
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    if (-not $commit) {
+        Write-Host "Usage: gCherryPick <commit>"
+        return
+    }
+
+    try {
+        git cherry-pick $commit
+        Write-Host "✅ Cherry-picked commit: $commit"
+    }
+    catch {
+        Write-Host "❌ Failed to cherry-pick commit: $commit"
+    }
+}
