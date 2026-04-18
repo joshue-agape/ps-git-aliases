@@ -626,3 +626,220 @@ function gFetch {
     }
 }
 
+
+# Description
+# This function displays Git commit history in different formats.
+
+# Usage
+# gLog              → Default git log
+# gLog oneline      → One-line history
+# gLog graph        → Graph view of branches
+# gLog stat         → Show stats per commit
+# gLog patch        → Show changes per commit
+# gLog pretty       → Custom formatted log
+# gLog all          → Full graph view with all branches
+function gLog {
+    param(
+        [ValidateSet("oneline","graph","stat","patch","pretty","all")]
+        [string]$type
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    try {
+        switch ($type) {
+            "oneline" { git log --oneline }
+            "graph"   { git log --oneline --graph --all }
+            "stat"    { git log --stat }
+            "patch"   { git log -p }
+            "pretty"  { git log --pretty=format:"%h - %an, %ar : %s" }
+            "all"     { git log --oneline --graph --decorate --all }
+            default   { git log }
+        }
+    }
+    catch {
+        Write-Host "❌ Failed to execute git log"
+    }
+}
+
+
+# Description
+# This function shows details of a specific commit.
+
+# Usage
+# gShow <commit>
+function gShow {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$commit
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        git show $commit
+    }
+    catch {
+        Write-Host "❌ Failed to show commit: $commit"
+    }
+}
+
+
+# Description
+# This function restores files from the staging area or working directory.
+
+# Usage
+# gRestore <file>           → Restore file from working tree
+# gRestore -staged <file>   → Unstage file
+function gRestore {
+    param(
+        [switch]$staged,
+        [Parameter(Mandatory=$true)]
+        [string]$file
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        if ($staged) {
+            git restore --staged $file
+            Write-Host "✅ File unstaged: $file"
+        }
+        else {
+            git restore $file
+            Write-Host "✅ File restored: $file"
+        }
+    }
+    catch {
+        Write-Host "❌ Failed to restore file: $file"
+    }
+}
+
+
+# Description
+# This function resets Git state (soft, hard, or file-specific reset).
+
+# Usage
+# gReset -h <commit>        → Hard reset
+# gReset -s <commit>        → Soft reset
+# gReset <file>             → Unstage file
+# gReset <commit> <file>    → Reset file to specific commit
+function gReset {
+    param(
+        [switch]$h,
+        [switch]$s,
+        [string]$arg1,
+        [string]$arg2
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    if ($h -and $s) {
+        Write-Host "❌ Use either -h or -s, not both"
+        return
+    }
+
+    try {
+        if ($h) {
+            git reset --hard $arg1
+            Write-Host "✅ Hard reset to: $arg1"
+        }
+        elseif ($s) {
+            git reset --soft $arg1
+            Write-Host "✅ Soft reset to: $arg1"
+        }
+        elseif ($arg1 -and $arg2) {
+            git reset $arg1 -- $arg2
+            Write-Host "✅ File reset: $arg2 → $arg1"
+        }
+        elseif ($arg1) {
+            git reset HEAD -- $arg1
+            Write-Host "✅ Unstaged: $arg1"
+        }
+        else {
+            Write-Host "❌ Invalid usage"
+        }
+    }
+    catch {
+        Write-Host "❌ Reset operation failed"
+    }
+}
+
+
+# Description
+# This function reverts a commit by creating a new commit.
+
+# Usage
+# gRevert <commit>
+function gRevert {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$commit
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        git revert $commit
+        Write-Host "✅ Commit reverted: $commit"
+    }
+    catch {
+        Write-Host "❌ Failed to revert commit: $commit"
+    }
+}
+
+
+# Description
+# This function manages Git stash operations.
+
+# Usage
+# gStash            → Save current changes
+# gStash list       → List stashes
+# gStash pop        → Apply and remove latest stash
+# gStash apply      → Apply stash without removing
+# gStash drop       → Delete a stash
+# gStash clear      → Remove all stashes
+function gStash {
+    param(
+        [ValidateSet("list","pop","apply","drop","clear")]
+        [string]$type,
+
+        [int]$index = 0
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    $target = "stash@{$index}"
+
+    try {
+        switch ($type) {
+            "list"  { git stash list }
+            "pop"   { git stash pop $target; Write-Host "✅ Stash popped: $index" }
+            "apply" { git stash apply $target; Write-Host "✅ Stash applied: $index" }
+            "drop"  { git stash drop $target; Write-Host "✅ Stash dropped: $index" }
+            "clear" { git stash clear; Write-Host "✅ All stashes cleared" }
+            default { git stash; Write-Host "✅ Changes stashed" }
+        }
+    }
+    catch {
+        Write-Host "❌ Stash operation failed: $type"
+    }
+}
