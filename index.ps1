@@ -83,3 +83,117 @@ function gConfig {
     }
 }
 
+
+# Description
+# This function initializes a new Git repository.
+# Optionally, it can also stage all files and create an initial commit.
+
+# Usage
+# gInit        → Initialize a Git repository only
+# gInit -c     → Initialize repository, add all files, and commit
+# gInit -c "message" → Initialize + add + commit with custom message
+function gInit {
+    param(
+        [switch]$c,
+        [string]$message = "Initial commit"
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    git init
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ Failed to initialize Git repository"
+        return
+    }
+
+    if ($c) {
+        git add .
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to stage files (git add)"
+            return
+        }
+
+        git commit -m "$message"
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Failed to create commit"
+            return
+        }
+
+        Write-Host "✅ Repository initialized and committed: $message"
+    } else {
+        Write-Host "✅ Repository initialized successfully"
+    }
+}
+
+
+# Description
+# This function provides an enhanced Git clone command.
+# It supports optional branch selection and target folder naming.
+
+# Usage
+# gClone <url>
+# gClone <url> <folder>
+# gClone <branch> <url> <folder>
+function gClone {
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [string]$arg1,
+
+        [Parameter(Position=1)]
+        [string]$arg2,
+
+        [Parameter(Position=2)]
+        [string]$arg3
+    )
+
+    $branch = $null
+    $url    = $null
+    $folder = $null
+
+    $isUrl1 = $arg1 -match '^(https?://|git@|ssh://|[\w.-]+@[\w.-]+:)'
+
+    if ($isUrl1) {
+        $url    = $arg1
+        $folder = $arg2
+    }
+    else {
+        $branch = $arg1
+        $url    = $arg2
+        $folder = $arg3
+    }
+
+    if (-not $url) {
+        Write-Host "❌ Invalid usage:"
+        Write-Host "  gClone <url>"
+        Write-Host "  gClone <url> [folder]"
+        Write-Host "  gClone <branch> <url> [folder]"
+        return
+    }
+
+    $gitArgs = @("clone")
+
+    if ($branch) {
+        $gitArgs += @("-b", $branch)
+    }
+
+    $gitArgs += $url
+
+    if ($folder) {
+        $gitArgs += $folder
+    }
+
+    try {
+        git @gitArgs
+        Write-Host "✅ Repository cloned successfully"
+    }
+    catch {
+        Write-Host "❌ Failed to clone repository"
+    }
+}
+
