@@ -243,3 +243,62 @@ function gAdd {
         Write-Host "❌ Failed to add files: $target"
     }
 }
+
+
+# Description
+# This function removes a file from the Git repository.
+# It uses `git rm` to delete the file and track the change.
+
+# Usage
+# gRemove <file> → Remove a file from Git
+function gRemove {
+    param([string]$file)
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    if (-not $file) {
+        Write-Host "Usage: gRemove <file>"
+        return
+    }
+
+    try {
+        git rm $file
+        Write-Host "✅ File removed: $file"
+    }
+    catch {
+        Write-Host "❌ Failed to remove file: $file"
+    }
+}
+
+
+# Description
+# This function moves or renames a file inside a Git repository.
+# It uses `git mv` to ensure Git tracks the change properly.
+
+# Usage
+# gMove <old> <new> → Move or rename a file
+function gMove {
+    param([string]$old, [string]$new)
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed or not available in PATH"
+        return
+    }
+
+    if (-not $old -or -not $new) {
+        Write-Host "Usage: gMove <old> <new>"
+        return
+    }
+
+    try {
+        git mv $old $new
+        Write-Host "✅ File moved: $old → $new"
+    }
+    catch {
+        Write-Host "❌ Failed to move file: $old → $new"
+    }
+}
+
