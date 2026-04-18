@@ -984,3 +984,137 @@ function gCherryPick {
         Write-Host "❌ Failed to cherry-pick commit: $commit"
     }
 }
+
+
+# Description
+# This function performs a Git rebase onto a specified branch.
+
+# Usage
+# gRebase <branch> → Rebase current branch onto target branch
+function gRebase {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$branch_name
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    if (-not $branch_name) {
+        Write-Host "Usage: gRebase <branch_name>"
+        return
+    }
+
+    try {
+        git rebase $branch_name
+        Write-Host "✅ Rebased onto branch: $branch_name"
+    }
+    catch {
+        Write-Host "❌ Rebase failed on: $branch_name"
+    }
+}
+
+
+# Description
+# This function shows Git reflog history (useful for recovering lost commits).
+
+# Usage
+# gReflog → Show reflog history
+function gReflog {
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        git reflog
+    }
+    catch {
+        Write-Host "❌ Failed to display reflog"
+    }
+}
+
+
+# Description
+# This function helps identify bugs using Git bisect.
+
+# Usage
+# gBisect start        → Start bisect process
+# gBisect good <hash>  → Mark commit as good
+# gBisect bad <hash>   → Mark commit as bad
+# gBisect reset        → Reset bisect process
+function gBisect {
+    param(
+        [ValidateSet("start","good","bad","reset")]
+        [string]$action = "start",
+
+        [string]$commit
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    try {
+        switch ($action) {
+            "start" {
+                git bisect start
+                Write-Host "✅ Bisect started"
+            }
+
+            "good" {
+                git bisect good $commit
+                Write-Host "✅ Marked as good: $commit"
+            }
+
+            "bad" {
+                git bisect bad $commit
+                Write-Host "✅ Marked as bad: $commit"
+            }
+
+            "reset" {
+                git bisect reset
+                Write-Host "✅ Bisect reset"
+            }
+        }
+    }
+    catch {
+        Write-Host "❌ Bisect operation failed: $action"
+    }
+}
+
+
+# Description
+# This function cleans untracked files from the working directory.
+
+# Usage
+# gClean        → Show what would be removed
+# gClean -force → Remove untracked files
+# gClean -dry   → Dry run (preview only)
+function gClean {
+    param(
+        [switch]$force,
+        [switch]$dry
+    )
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Git is not installed"
+        return
+    }
+
+    $cmd = "git clean"
+
+    if ($force) { $cmd += " -f" }
+    if ($dry)   { $cmd += " -n" }
+
+    try {
+        Invoke-Expression $cmd
+        Write-Host "✅ Executed: $cmd"
+    }
+    catch {
+        Write-Host "❌ Failed to execute git clean"
+    }
+}
